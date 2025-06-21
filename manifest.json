@@ -9,21 +9,15 @@
     "scripting",
     "tabs"
   ],
+
   "host_permissions": [
-    "<all_urls>"
+    "<all_urls>",
+    "http://localhost:5001/*"
   ],
 
   "background": {
     "service_worker": "background.js"
   },
-
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"],
-      "run_at": "document_idle"
-    }
-  ],
 
   "action": {
     "default_popup": "build/index.html"

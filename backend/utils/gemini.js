@@ -1,6 +1,4 @@
 // gemini.js
-import 'dotenv/config';
-
 // sends prompt to Gemini and parses the result
 import { GoogleGenAI } from "@google/genai";
 

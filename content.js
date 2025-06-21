@@ -1,80 +1,86 @@
-// Converts base64 audio string to a Blob (binary large object)
+// content.js
+
+// Converts Base64 audio string to a Blob
 function base64ToBlob(base64, mime) {
-    const byteCharacters = atob(base64);
-    const byteArrays = [];
-    for (let i = 0; i < byteCharacters.length; i += 512) {
-      const slice = byteCharacters.slice(i, i + 512);
-      const byteNumbers = new Array(slice.length);
-      for (let j = 0; j < slice.length; j++) {
-        byteNumbers[j] = slice.charCodeAt(j);
-      }
-      byteArrays.push(new Uint8Array(byteNumbers));
-    }
-    return new Blob(byteArrays, { type: mime });
+  const byteCharacters = atob(base64);
+  const byteArrays = [];
+
+  for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+    const slice = byteCharacters.slice(offset, offset + 512);
+    const byteNumbers = Array.from(slice, char => char.charCodeAt(0));
+    byteArrays.push(new Uint8Array(byteNumbers));
   }
-  
-  function showWarning(summary, confidence) {
-    let riskLevel = "Low";
-    if (confidence > 0.66) riskLevel = "High";
-    else if (confidence > 0.33) riskLevel = "Medium";
-  
-    const bubble = document.createElement("div");
-    bubble.innerText = `Risk: ${riskLevel}\n\n${summary}`;
-    Object.assign(bubble.style, {
-      position: "fixed",
-      top: "20px",
-      right: "20px",
-      backgroundColor: "white",
-      color: "black",
-      border: "1px solid black",
-      padding: "10px",
-      borderRadius: "6px",
-      zIndex: 999999
-    });
-    document.body.appendChild(bubble);
-    setTimeout(() => bubble.remove(), 10000);
-  }
-  
-  let lastHtml = "";
-  async function analyzePage() {
-    chrome.storage.sync.get(
-      ["textWarning", "voiceWarning", "language"],
-      async prefs => {
-        const html = document.documentElement.outerHTML;
-        if (html === lastHtml) return;  // skip duplicates
-        lastHtml = html;
-  
-        const language = prefs.language || "english";
-        const textWarning = prefs.textWarning ?? true;
-        const voiceWarning = prefs.voiceWarning ?? true;
-  
-        try {
-          const res = await fetch("http://localhost:5001/analyze", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ html, language })
-          });
-          const data = await res.json();
-          if (data?.is_scam) {
-            if (textWarning) showWarning(data.summary, data.confidence);
-            if (voiceWarning && data.audio) {
-              const blob = base64ToBlob(data.audio, "audio/mpeg");
-              new Audio(URL.createObjectURL(blob)).play();
-            }
+
+  return new Blob(byteArrays, { type: mime });
+}
+
+// Displays a temporary warning bubble in the top-right
+function showWarning(summary, confidence) {
+  let riskLevel = 'Low';
+  if (confidence > 0.66)      riskLevel = 'High';
+  else if (confidence > 0.33) riskLevel = 'Medium';
+
+  const bubble = document.createElement('div');
+  bubble.innerText = `Risk: ${riskLevel}\n\n${summary}`;
+  Object.assign(bubble.style, {
+    position:     'fixed',
+    top:          '20px',
+    right:        '20px',
+    background:   'white',
+    color:        'black',
+    border:       '1px solid black',
+    padding:      '10px',
+    borderRadius: '6px',
+    zIndex:       '999999'
+  });
+
+  document.body.appendChild(bubble);
+  setTimeout(() => bubble.remove(), 10_000);
+}
+
+let lastHtml = '';
+
+function analyzePage() {
+  // Load user prefs with defaults
+  chrome.storage.sync.get(
+    ['language', 'textWarning', 'voiceWarning'],
+    prefs => {
+      const language     = prefs.language     || 'english';
+      const textWarning  = prefs.textWarning  ?? true;
+      const voiceWarning = prefs.voiceWarning ?? true;
+
+      // Snapshot full-page HTML, skip if unchanged
+      const html = document.documentElement.outerHTML;
+      if (html === lastHtml) return;
+      lastHtml = html;
+
+      // Send to background for fetch 
+      chrome.runtime.sendMessage(
+        { type: 'analyzePage', html, language },
+        resp => {
+          if (resp.error) {
+            console.error('Analyze server error:', resp.error);
+            return;
           }
-        } catch (err) {
-          console.error("Error analyzing page:", err);
+          const data = resp.data;
+          if (!data || !data.is_scam) return;
+
+          // Honor text/voice prefs
+          if (textWarning) showWarning(data.summary, data.confidence);
+          if (voiceWarning && data.audio) {
+            const blob = base64ToBlob(data.audio, 'audio/mpeg');
+            new Audio(URL.createObjectURL(blob)).play();
+          }
         }
-      }
-    );
-  }
-  
-  // initial run + debounce on DOM changes
+      );
+    }
+  );
+}
+
+// Initial run + debounce on DOM mutations
 analyzePage();
 let debounceTimer;
-const observer = new MutationObserver(() => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(analyzePage, 500);
-});
-observer.observe(document.body, { childList: true, subtree: true });
-  
+new MutationObserver(() => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(analyzePage, 500);
+}).observe(document.body, { childList: true, subtree: true });
