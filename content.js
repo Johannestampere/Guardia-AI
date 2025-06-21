@@ -8,9 +8,10 @@ function base64ToBlob(base64, mime) {
   for (let offset = 0; offset < byteCharacters.length; offset += 512) {
     const slice = byteCharacters.slice(offset, offset + 512);
     const byteNumbers = Array.from(slice, char => char.charCodeAt(0));
+    "http://localhost:5001/*"
     byteArrays.push(new Uint8Array(byteNumbers));
   }
-
+  console.log("Converted base64 to blob");
   return new Blob(byteArrays, { type: mime });
 }
 
@@ -36,6 +37,7 @@ function showWarning(summary, confidence) {
 
   document.body.appendChild(bubble);
   setTimeout(() => bubble.remove(), 10_000);
+  console.log("Showed warning");
 }
 
 let lastHtml = '';
@@ -62,6 +64,7 @@ function analyzePage() {
             console.error('Analyze server error:', resp.error);
             return;
           }
+          console.log("Received response from background");
           const data = resp.data;
           if (!data || !data.is_scam) return;
 

@@ -39,7 +39,7 @@ ${html}
       model: "gemini-2.5-flash",
       contents: prompt
     });
-
+    console.log("Called Gemini");
     const raw = response.text || "";
 
     // Parse it into an object (String -> JSON)

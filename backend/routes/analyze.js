@@ -27,6 +27,7 @@ app.post('/analyze', async (req, res) => {
       summary:    analysis.summary,
       audio:      audioBase64
     });
+    console.log("Sent response back to content script");
   } catch (err) {
     console.error('Error in /analyze:', err);
     res.status(500).json({ error: 'Internal server error' });

@@ -12,5 +12,6 @@ export async function fetchTTS(text) {
     }
   );
   const { audioContent } = await resp.json();
+  console.log("Called TTS");
   return audioContent; // Base64-encoded MP3
 }
