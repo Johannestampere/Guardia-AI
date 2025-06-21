@@ -46,7 +46,7 @@ export default function App() {
 
   return (
     <div className="w-64 p-4 bg-white rounded-lg shadow font-sans text-sm text-gray-800">
-      <h1 className="text-xl font-bold text-center mb-4">🛡️ Fraud Protector</h1>
+      <h1 className="text-xl font-bold text-center mb-4">Fraud Protector</h1>
 
       <p className="font-medium mb-2">Alert Options:</p>
 
