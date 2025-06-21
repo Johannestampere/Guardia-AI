@@ -49,7 +49,7 @@ function base64ToBlob(base64, mime) {
         const voiceWarning = prefs.voiceWarning ?? true;
   
         try {
-          const res = await fetch("http://localhost:5000/analyze", {
+          const res = await fetch("http://localhost:5001/analyze", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ html, language })
