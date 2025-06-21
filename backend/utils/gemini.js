@@ -5,19 +5,22 @@ import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
 
-chrome.runtime.onMessage.addListener(async (msg, sender) => {
-  if (msg.action !== "html_loaded" || !sender.tab?.id) return;
-
-  // Truncate if the page is huge
-  // const htmlPayload = msg.html.slice(0, 15000); (commented out for now)
+/**
+ * Analyzes HTML content for potential fraudulent activity using Gemini API
+ * @param {string} html - The HTML content to analyze
+ * @param {string} language - the output language of the analysis
+ * @returns {Promise<Object>} - Parsed JSON result with scam analysis
+ */
+export async function geminiScamAnalyzer(html, language) {
   // start of prompt for gemini api
-const prompt = `You are a web-security analyst. Given the full HTML of a webpage, identify any potential fraudulent activity or scams. Specifically:
+  const prompt = `You are a web-security analyst. Given the full HTML of a webpage, identify any potential fraudulent activity or scams. Specifically:
 1. Flag phishing forms requesting personal, login, or payment information.
-2. Highlight deceptive language promising unrealistic rewards or urgent action (“Click now or lose…”).
+2. Highlight deceptive language promising unrealistic rewards or urgent action ("Click now or lose…").
 3. Spot links whose visible text and actual URLs don't match, or domains that look off.
 4. Call out hidden or obfuscated scripts that could exfiltrate user data.
 5. Note any other red flags (typosquatting, fake trust seals, mismatched SSL warnings, etc.).
 
+Use the following language for the summary and recommendation output: ${language}
 Output a JSON object with these fields:
 {
   "is_scam": <true|false>,
@@ -35,9 +38,9 @@ Output a JSON object with these fields:
 
 HTML:
 \`\`\`html
-${msg.html}
+${html}
 \`\`\``;
-// end of prompt
+  // end of prompt
 
   try {
     // Call Gemini API
@@ -58,15 +61,10 @@ ${msg.html}
       result = { summary: raw, issues: [] };
     }
 
-    // Send structured data to the content script
-    chrome.tabs.sendMessage(sender.tab.id, {
-      action: "gemini_response",
-      data: result
-    });
+    return result;
 
   } catch (err) {
     console.error("Gemini API error:", err);
-    chrome.tabs.sendMessage(sender.tab.id, { action: "gemini_error" });
+    throw err;
   }
-
-});
+}
