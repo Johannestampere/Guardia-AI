@@ -1,1 +1,0 @@
-// sends prompt to Gemini and parses the result
