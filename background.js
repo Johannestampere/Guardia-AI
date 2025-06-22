@@ -1,4 +1,3 @@
-// background.js
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === 'analyzePage') {
     fetch("http://localhost:5001/analyze", {
@@ -17,6 +16,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse({ error: err.message });
       });
     console.log("Received response from analyze page");
+    console.log("[Background] onMessage listener registered");
+    console.log("[Background] sending fetch for", msg.html?.slice(0,30)+"…");
+
     return true; // keep the message channel open for async sendResponse
   }
 });
