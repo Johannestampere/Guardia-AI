@@ -1,8 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "Fraud Protector",
+  "name": "Guardia AI",
   "description": "A Chrome extension that protects users from online fraud and scams using AI-powered analysis and voice alerts, focused specifically on protecting the elderly. Built with React frontend and Node.js backend.",
   "version": "1.0",
+
+  "icons": {
+    "16": "image.png",
+    "32": "image.png",
+    "48": "image.png",
+    "128": "image.png"
+  },
 
   "permissions": [
     "storage",
@@ -30,7 +37,13 @@
   ],
 
   "action": {
-    "default_popup": "build/index.html"
+    "default_popup": "build/index.html",
+    "default_icon": {
+      "16": "image.png",
+      "32": "image.png",
+      "48": "image.png",
+      "128": "image.png"
+    }
   },
 
   "web_accessible_resources": [{
