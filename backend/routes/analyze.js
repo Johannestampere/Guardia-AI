@@ -1,4 +1,3 @@
-// analyze.js
 import 'dotenv/config';
 import express from 'express';
 import { geminiScamAnalyzer } from '../utils/gemini.js';
@@ -8,6 +7,8 @@ import cors from 'cors';
 const app = express();
 const PORT = process.env.PORT || 5001;
 
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ limit: '5mb', extended: true }));
 app.use(cors({ origin: '*' }));
 app.use(express.json());
 

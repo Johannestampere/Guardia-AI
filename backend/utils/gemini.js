@@ -1,61 +1,66 @@
 // gemini.js
-// sends prompt to Gemini and parses the result
 import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
 
 /**
  * Analyzes HTML content for potential fraudulent activity using Gemini API
- * @param {string} html - The HTML content to analyze
- * @param {string} language - the output language of the analysis
- * @returns {Promise<Object>} - Parsed JSON result with scam analysis
+ * @param {string} html - The page snapshot to analyze (e.g. title, text, links)
+ * @param {string} language - Output language for summary/recommendation
+ * @returns {Promise<{is_scam: boolean, confidence: number, summary: string}>}
  */
 export async function geminiScamAnalyzer(html, language) {
-  // start of prompt for gemini api
-  const prompt = `You are a web-security analyst. Given the full HTML of a webpage, identify any potential fraudulent activity or scams. Specifically:
-1. Flag phishing forms requesting personal, login, or payment information.
-2. Highlight deceptive language promising unrealistic rewards or urgent action ("Click now or lose…").
-3. Spot links whose visible text and actual URLs don't match, or domains that look off.
-4. Call out hidden or obfuscated scripts that could exfiltrate user data.
-5. Note any other red flags (typosquatting, fake trust seals, mismatched SSL warnings, etc.).
+  // 1. Build your prompt, with correct JSON schema
+  const prompt = `You are a web-security analyst. Given a snapshot of a webpage (title, text, links, etc.), identify any potential fraudulent activity or scams. Specifically:
+1. Flag phishing forms requesting personal or payment information.
+2. Highlight deceptive language promising unrealistic rewards or urgent action.
+3. Spot mismatched link text vs. href, typosquatting domains, or obfuscated scripts.
+4. Note any other red flags (fake trust seals, mismatched SSL warnings, etc.).
 
-Use the following language for the summary and recommendation output: ${language}
-Output a JSON object with these fields:
+Use ${language} for the summary and recommendation.  
+**Respond with only valid JSON**—no backticks, no markdown fences:
+
 {
-  "is_scam": <true|false>,
-  "confidence": <0.0–1.0>,
-  "summary: "A one-sentence verdict/explanation, and a recommendation on what the user should do (e.g. avoid, report, enable security extension)"
+  "is_scam": true,
+  "confidence": 0.0,
+  "summary": "A one-sentence verdict and recommendation (e.g. avoid, report, enable security extension)."
 }
 
-HTML:
-\`\`\`html
+Snapshot:
+\`\`\`
 ${html}
-\`\`\``;
-  // end of prompt
+\`\`\``; 
 
   try {
-    // Call Gemini API
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: prompt
     });
     console.log("Called Gemini");
-    const raw = response.text || "";
 
-    // Parse it into an object (String -> JSON)
-    let result;
-    try {
-      result = JSON.parse(raw);
-    } catch (parseErr) {
-      console.error("Failed to parse Gemini JSON:", parseErr, raw);
-      // Fallback: wrap the raw text so the content script can at least display it
-      result = { summary: raw, issues: [] };
+    const raw = response.text ?? "";
+
+    let jsonText = raw
+      .replace(/```(?:json)?\s*/g, "")
+      .replace(/\s*```$/g, "")
+      .trim();
+
+    const start = jsonText.indexOf("{");
+    const end   = jsonText.lastIndexOf("}");
+    if (start !== -1 && end !== -1 && end > start) {
+      jsonText = jsonText.substring(start, end + 1);
     }
 
-    return result;
+    const parsed = JSON.parse(jsonText);
+
+    return {
+      is_scam:    parsed.is_scam,
+      confidence: parsed.confidence,
+      summary:    parsed.summary
+    };
 
   } catch (err) {
-    console.error("Gemini API error:", err);
+    console.error("Gemini API error or parse failure:", err);
     throw err;
   }
 }
