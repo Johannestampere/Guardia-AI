@@ -28,11 +28,9 @@ export function extractHTML(html, baseDomain = '') {
     eventHandlers: []
   };
 
-  // base href
   const baseTag = $('base').attr('href');
   if (baseTag) result.baseHref = baseTag.trim();
 
-  // Anchors
   $('a[href]').each((i, el) => {
     const hrefRaw = $(el).attr('href').trim();
     const href    = resolveUrl(hrefRaw);
@@ -40,7 +38,6 @@ export function extractHTML(html, baseDomain = '') {
     result.anchors.push({ text, href });
   });
 
-  // Forms and inputs
   $('form').each((i, el) => {
     const actionRaw = $(el).attr('action') || '';
     const action    = resolveUrl(actionRaw.trim());
@@ -57,7 +54,6 @@ export function extractHTML(html, baseDomain = '') {
     result.forms.push({ action, method, inputs });
   });
 
-  // Scripts
   $('script').each((i, el) => {
     const srcRaw = $(el).attr('src');
     if (srcRaw) {
@@ -68,45 +64,38 @@ export function extractHTML(html, baseDomain = '') {
     }
   });
 
-  // Meta-refresh
   $('meta[http-equiv]').each((i, el) => {
     if ($(el).attr('http-equiv').toLowerCase() === 'refresh') {
       result.metaRefresh = $(el).attr('content')?.trim() || null;
     }
   });
 
-  // Other meta tags
   $('meta[name], meta[property]').each((i, el) => {
     const nameOrProperty = $(el).attr('name') || $(el).attr('property');
     const content        = $(el).attr('content') || '';
     result.metas.push({ nameOrProperty: nameOrProperty.trim(), content: content.trim() });
   });
 
-  // Link tags
   $('link[rel][href]').each((i, el) => {
     const rel     = $(el).attr('rel').trim();
     const hrefRaw = $(el).attr('href').trim();
     result.links.push({ rel, href: resolveUrl(hrefRaw) });
   });
 
-  // Iframes
   $('iframe').each((i, el) => {
     const srcRaw = $(el).attr('src') || '';
     const style  = $(el).attr('style') || '';
     result.iframes.push({ src: resolveUrl(srcRaw.trim()), style: style.trim() });
   });
 
-  // JSON-LD
   $('script[type="application/ld+json"]').each((i, el) => {
     const txt = $(el).html() || '';
     try {
       result.jsonLd.push(JSON.parse(txt));
     } catch {
-      // ignore invalid JSON-LD
     }
   });
 
-  // Inline event handlers
   $('[onclick],[onerror],[onmouseover],[onsubmit]').each((i, el) => {
     for (const attr of ['onclick','onerror','onmouseover','onsubmit']) {
       const code = $(el).attr(attr);

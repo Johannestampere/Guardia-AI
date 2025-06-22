@@ -4,6 +4,7 @@ const config = {
   language: 'english',
   textWarning: true,
   voiceWarning: true,
+  textSize: 14,
 };
 
 const VOICE_LANG_CODES = {
@@ -15,7 +16,7 @@ const VOICE_LANG_CODES = {
 function initPrefs() {
 
   chrome.storage.sync.get(
-    ['language','textWarning','voiceWarning'],
+    ['language','textWarning','voiceWarning','textSize'],
     prefs => {
       Object.assign(config, prefs);
       analyzePage();
@@ -26,6 +27,7 @@ function initPrefs() {
     if (changes.language) config.language = changes.language.newValue;
     if (changes.textWarning) config.textWarning = changes.textWarning.newValue;
     if (changes.voiceWarning) config.voiceWarning = changes.voiceWarning.newValue;
+    if (changes.textSize) config.textSize = changes.textSize.newValue;
     analyzePage();
   });
 }
@@ -69,6 +71,14 @@ function base64ToBlob(b64, mime) {
   return new Blob(arrs, { type: mime });
 }
 
+function playSpeechSynthesis(text) {
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = VOICE_LANG_CODES[config.language] || 'en-US';
+  utter.volume = 1.0;
+  utter.rate = 0.9;
+  speechSynthesis.speak(utter);
+}
+
 function showWarning(summary, confidence, audioBase64) {
   const lvl = confidence > 0.66 ? 'High'
             : confidence> 0.33 ? 'Medium'
@@ -85,47 +95,54 @@ function showWarning(summary, confidence, audioBase64) {
     borderRadius: '6px',
     zIndex:   '999999',
     maxWidth: '300px',
-    fontFamily:'sans-serif'
+    fontFamily:'sans-serif',
+    fontSize: `${config.textSize || 14}px`
   });
 
   const title = document.createElement('div');
   title.innerText = `Risk: ${lvl}`;
   title.style.fontWeight = 'bold';
+  title.style.fontSize = `${(config.textSize || 14) + 2}px`;
   bubble.appendChild(title);
 
   const msg = document.createElement('div');
   msg.innerText = summary;
   msg.style.margin = '8px 0';
+  msg.style.fontSize = `${config.textSize || 14}px`;
   bubble.appendChild(msg);
 
-  const btn = document.createElement('button');
-  btn.innerText = '🔊 Listen';
-  Object.assign(btn.style, {
-    cursor: 'pointer',
-    background: '#007bff',
-    color: 'white',
-    border: 'none',
-    padding: '6px 12px',
-    borderRadius: '4px'
-  });
-  btn.addEventListener('click', () => {
-    if (audioBase64) {
-      const player = new Audio(URL.createObjectURL(base64ToBlob(audioBase64,'audio/mpeg')));
-      player.play().catch(() => {
-        const utter = new SpeechSynthesisUtterance(summary);
-        utter.lang = VOICE_LANG_CODES[config.language] || 'en-US';
-        speechSynthesis.speak(utter);
-      });
+  if (config.voiceWarning) {
+    if (audioBase64 && audioBase64.length > 0) {
+      try {
+        const audioBlob = base64ToBlob(audioBase64, 'audio/mpeg');
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const player = new Audio(audioUrl);
+        player.volume = 1.0;
+        
+        player.play().then(() => {
+        }).catch((error) => {
+          console.error('[Content] Audio playback failed:', error);
+          playSpeechSynthesis(summary);
+        });
+        
+        player.addEventListener('error', (error) => {
+          console.error('[Content] Audio error:', error);
+          playSpeechSynthesis(summary);
+        });
+        
+      } catch (error) {
+        console.error('[Content] Error creating audio:', error);
+        playSpeechSynthesis(summary);
+      }
     } else {
-      const utter = new SpeechSynthesisUtterance(summary);
-      utter.lang = VOICE_LANG_CODES[config.language];
-      speechSynthesis.speak(utter);
+      playSpeechSynthesis(summary);
     }
-  });
+  } else {
+    console.log('[Content] Voice warning disabled in config');
+  }
 
-  bubble.appendChild(btn);
   document.body.appendChild(bubble);
-  setTimeout(()=>bubble.remove(), 15000);
+  setTimeout(()=>bubble.remove(), 30000);
 }
 
 let lastSnapshot = '';
@@ -134,7 +151,6 @@ function analyzePage() {
   if (snap === lastSnapshot) return;
   lastSnapshot = snap;
 
-  console.log('[Content] sending to backend:\n', snap);
   chrome.runtime.sendMessage(
     { type:'analyzePage', html:snap, language:config.language },
     resp => {
@@ -147,24 +163,14 @@ function analyzePage() {
         return;
       }
       const data = resp.data;
-      console.log('[Content] analysis:', data);
 
-      if (data.is_scam && config.textWarning) {
-
+      if (data.is_scam) {
         showWarning(data.summary, data.confidence, data.audio);
-        if (config.voiceWarning && 'speechSynthesis' in window) {
-          const utter = new SpeechSynthesisUtterance(data.summary);
-          utter.lang = VOICE_LANG_CODES[config.language] || 'en-US';
-          speechSynthesis.speak(utter);
-        }
       }
     }
   );
 }
 
-// ———————————————————————————————
-// 5) SPA navigation hooks
-// ———————————————————————————————
 function hookHistory(type) {
   const orig = history[type];
   history[type] = function(...args) {
@@ -173,6 +179,7 @@ function hookHistory(type) {
     return ret;
   };
 }
+
 function initNavigationHooks() {
   hookHistory('pushState');
   hookHistory('replaceState');
@@ -180,8 +187,5 @@ function initNavigationHooks() {
   window.addEventListener('hashchange', ()=>setTimeout(analyzePage,500));
 }
 
-// ———————————————————————————————
-// 6) Bootstrap
-// ———————————————————————————————
 initPrefs();
 initNavigationHooks();

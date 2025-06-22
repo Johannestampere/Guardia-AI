@@ -24,16 +24,23 @@ app.post('/analyze', async (req, res) => {
     const analysis = await geminiScamAnalyzer(html, language);
 
     // 2) Generate TTS in the chosen language
-    const audioBase64 = await fetchTTS(analysis.summary, language);
+    let audioBase64 = null;
+    try {
+      audioBase64 = await fetchTTS(analysis.summary, language);
+    } catch (error) {
+      console.error('[Analyze] TTS failed:', error);
+      audioBase64 = null; // Ensure it's null if TTS fails
+    }
 
     // 3) Return everything
-    res.json({
+    const response = {
       is_scam:    analysis.is_scam,
       confidence: analysis.confidence,
       summary:    analysis.summary,
       audio:      audioBase64
-    });
-    console.log('Sent response back to content script');
+    };
+    
+    res.json(response);
   } catch (err) {
     console.error('Error in /analyze:', err);
     res.status(500).json({ error: err.message || 'Internal server error' });

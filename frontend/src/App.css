@@ -28,6 +28,47 @@
   color: #61dafb;
 }
 
+/* Custom slider styling for better accessibility */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border-radius: 5px;
+  background: #e5e7eb;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+input[type="range"]:hover::-webkit-slider-thumb {
+  background: #2563eb;
+}
+
+input[type="range"]:hover::-moz-range-thumb {
+  background: #2563eb;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
