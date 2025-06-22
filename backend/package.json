@@ -7,6 +7,7 @@
         "start": "node index.js"
     },
     "dependencies": {
+        "@google-cloud/text-to-speech": "^6.1.0",
         "@google/genai": "^1.6.0",
         "axios": "^1.6.7",
         "cheerio": "^1.1.0",
