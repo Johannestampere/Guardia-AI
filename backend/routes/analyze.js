@@ -8,7 +8,6 @@ import { fetchTTS } from '../utils/texttospeech.js';
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// allow large snapshots
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cors({ origin: '*' }));
@@ -20,19 +19,16 @@ app.post('/analyze', async (req, res) => {
       return res.status(400).json({ error: 'Missing html or language in request body' });
     }
 
-    // 1) Ask Gemini for scam analysis
     const analysis = await geminiScamAnalyzer(html, language);
 
-    // 2) Generate TTS in the chosen language
     let audioBase64 = null;
     try {
       audioBase64 = await fetchTTS(analysis.summary, language);
     } catch (error) {
       console.error('[Analyze] TTS failed:', error);
-      audioBase64 = null; // Ensure it's null if TTS fails
+      audioBase64 = null;
     }
 
-    // 3) Return everything
     const response = {
       is_scam:    analysis.is_scam,
       confidence: analysis.confidence,

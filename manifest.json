@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Fraud Protector",
-  "description": "Protects elderly users from fraud using AI and voice alerts.",
+  "description": "A Chrome extension that protects users from online fraud and scams using AI-powered analysis and voice alerts, focused specifically on protecting the elderly. Built with React frontend and Node.js backend.",
   "version": "1.0",
 
   "permissions": [
@@ -34,7 +34,7 @@
   },
 
   "web_accessible_resources": [{
-    "resources": ["build/static/*/*"],
+    "resources": ["build/static/*/*", "image.png"],
     "matches": ["<all_urls>"]
   }]
 } 

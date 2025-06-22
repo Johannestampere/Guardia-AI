@@ -3,7 +3,6 @@ import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
 
-// Map our config.language → proper language names for Gemini
 const LANG_MAP = {
   english: "English",
   spanish: "Spanish",
@@ -13,18 +12,16 @@ const LANG_MAP = {
 export async function geminiScamAnalyzer(html, language) {
   const promptLang = LANG_MAP[language.toLowerCase()] || "English";
 
-  const prompt = `You are a web-security analyst. Given a snapshot of a webpage (title, text, links, etc.), identify any potential fraudulent activity or scams. Specifically:
-1. Flag phishing forms requesting personal or payment information.
-2. Highlight deceptive language promising unrealistic rewards or urgent action.
-3. Spot mismatched link text vs. href, typosquatting domains, or obfuscated scripts.
-4. Note any other red flags (fake trust seals, mismatched SSL warnings, etc.).
+  const prompt = `You are a friendly and caring web-security assistant helping elderly users stay safe online. Given a snapshot of a webpage (title, text, links, etc.), identify any potential fraudulent activity or scams. 
+
+Please be very gentle and reassuring in your response. Remember, you're talking to elderly users who might be worried or confused.
 
 Please **respond only with valid JSON**, no backticks or markdown fences, and write your summary & recommendation in **${promptLang}**:
 
 {
   "is_scam": true,
   "confidence": 0.0,
-  "summary": "One-sentence verdict & recommendation (e.g. avoid, report, enable security extension)."
+  "summary": "A friendly, calm, and reassuring message explaining the concern in simple terms. Use gentle language like 'It looks like this might not be safe' or 'We want to help you stay protected'. Avoid scary words like 'dangerous' or 'scam'. Instead, say things like 'This doesn't seem quite right' or 'Let's be extra careful here'."
 }
 
 Snapshot:
@@ -38,7 +35,6 @@ ${html}
     });
     console.log("Called Gemini");
 
-    // clean out any stray fences
     let raw = response.text ?? "";
     let jsonText = raw
       .replace(/```(?:json)?\s*/g, "")

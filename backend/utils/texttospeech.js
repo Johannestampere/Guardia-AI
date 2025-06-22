@@ -1,14 +1,13 @@
 // texttospeech.js
 export async function fetchTTS(text, language) {
-  // Check if API key is available
   if (!process.env.GOOGLE_CLOUD_TTS_KEY) {
     console.error("[TTS] GOOGLE_CLOUD_TTS_KEY not found in environment variables");
     return null;
   }
 
-  // map your config.language → Google TTS voice settings
+
   const VOICE_MAP = {
-    english: { languageCode: "en-US", name: "en-US-Wavenet-F" },
+    english: { languageCode: "en-US", name: "en-US-Chirp3-HD-Aoede" },
     french:  { languageCode: "fr-FR", name: "fr-FR-Chirp3-HD-Sulafat" },
     spanish: { languageCode: "es-ES", name: "es-ES-Wavenet-D" },
   };

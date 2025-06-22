@@ -8,7 +8,7 @@ export default function App() {
   const [voiceWarning, setVoiceWarning] = useState(true);
   const [language, setLanguage] = useState("english");
   const [textSize, setTextSize] = useState(14);
-s
+
   useEffect(() => {
     if (typeof chrome !== "undefined" && chrome.storage) {
       chrome.storage.sync.get(["textWarning", "voiceWarning", "language", "textSize"], (result) => {
@@ -53,57 +53,58 @@ s
   };
 
   return (
-    <div className="w-64 p-4 bg-white rounded-lg shadow font-sans text-sm text-gray-800">
-      <h1 className="text-xl font-bold text-center mb-4">Fraud Protector</h1>
+    <div className="w-96 p-8 bg-white rounded-2xl shadow-lg font-sans text-base text-gray-800">
+      <h1 className="text-3xl font-bold text-center mb-6 text-gray-900">Guardia AI🛡</h1>
+      <h2 className="text-center mb-6 text-gray-900">Your personal AI security assistant</h2>
 
-      <p className="font-medium mb-2">Alert Options:</p>
+      <p className="font-semibold mb-3 text-gray-700 text-lg">Alert Options:</p>
 
-      <div className="flex flex-col gap-3 mb-4">
-        <label className="flex items-center gap-2">
+      <div className="flex flex-col gap-4 mb-6">
+        <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer">
           <input
             type="checkbox"
             checked={textWarning}
             onChange={() => handleToggle("text")}
-            className="w-4 h-4"
+            className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
           />
-          <span>Text Warning</span>
+          <span className="font-medium text-base">Text Warning</span>
         </label>
 
-        <label className="flex items-center gap-2">
+        <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer">
           <input
             type="checkbox"
             checked={voiceWarning}
             onChange={() => handleToggle("voice")}
-            className="w-4 h-4"
+            className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
           />
-          <span>Voice Warning</span>
+          <span className="font-medium text-base">Voice Warning</span>
         </label>
       </div>
 
-      <div className="mb-4">
-        <p className="font-medium mb-1">Language:</p>
+      <div className="mb-6">
+        <p className="font-semibold mb-2 text-gray-700 text-lg">Language:</p>
         <select
           value={language}
           onChange={handleLanguageChange}
-          className="w-full border rounded px-2 py-1 bg-white"
+          className="w-full border-2 border-gray-200 rounded-lg px-3 py-2 bg-white focus:border-blue-500 focus:outline-none transition-colors text-base"
         >
-          <option value="english">English</option>
-          <option value="spanish">Spanish</option>
-          <option value="french">French</option>
+          <option value="english">🇺🇸 English</option>
+          <option value="spanish">🇪🇸 Spanish</option>
+          <option value="french">🇫🇷 French</option>
         </select>
       </div>
 
       <div>
-        <p className="font-medium mb-1">Text Size: {textSize}px</p>
+        <p className="font-semibold mb-2 text-gray-700 text-lg">Text Size: {textSize}px</p>
         <input
           type="range"
-          min="10"
-          max="24"
+          min="12"
+          max="32"
           value={textSize}
           onChange={handleTextSizeChange}
-          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+          className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer"
         />
-        <div className="flex justify-between text-xs text-gray-500 mt-1">
+        <div className="flex justify-between text-sm text-gray-500 mt-2">
           <span>Small</span>
           <span>Large</span>
         </div>
