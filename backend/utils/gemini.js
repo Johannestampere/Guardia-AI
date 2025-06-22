@@ -1,6 +1,7 @@
 // gemini.js
 import { GoogleGenAI } from "@google/genai";
 
+
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
 
 /**
@@ -9,7 +10,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
  * @param {string} language - Output language for summary/recommendation
  * @returns {Promise<{is_scam: boolean, confidence: number, summary: string}>}
  */
-export async function geminiScamAnalyzer(html, language) {
+export async function geminiScamAnalyzer(snapshot, language) {
   // 1. Build your prompt, with correct JSON schema
   const prompt = `You are a web-security analyst. Given a snapshot of a webpage (title, text, links, etc.), identify any potential fraudulent activity or scams. Specifically:
 1. Flag phishing forms requesting personal or payment information.
@@ -28,7 +29,7 @@ Use ${language} for the summary and recommendation.
 
 Snapshot:
 \`\`\`
-${html}
+${snapshot}
 \`\`\``; 
 
   try {

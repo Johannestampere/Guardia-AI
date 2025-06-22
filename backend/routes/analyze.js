@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import { geminiScamAnalyzer } from '../utils/gemini.js';
 import { fetchTTS } from '../utils/texttospeech.js';
+import { extractHTML } from '../utils/extract.js';
 import cors from 'cors';
 
 const app = express();
@@ -14,12 +15,14 @@ app.use(express.json());
 
 app.post('/analyze', async (req, res) => {
   try {
-    const { html, language } = req.body;
-    if (!html || !language) {
-      return res.status(400).json({ error: 'Missing html or language in request body' });
+    const { html, baseDomain, language } = req.body;
+    if (!html || !baseDomain || !language) {
+      return res.status(400).json({ error: 'Missing html, baseDomain, or language in request body' });
     }
 
-    const analysis = await geminiScamAnalyzer(html, language);
+    const extracted = extractHTML(html, baseDomain);
+
+    const analysis = await geminiScamAnalyzer(extracted, language);
     const audioBase64 = await fetchTTS(analysis.summary);
 
     res.json({
